@@ -34,15 +34,24 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/health", healthhandler)
 	http.HandleFunc("/products", productsHandler)
-	http.HandleFunc("/products/", productDetailHandler)
+	http.HandleFunc("/products/{id}", productDetailHandler)
 	fmt.Println("Starting server on :8080")
 	http.ListenAndServe(":8080", nil)
+}
+func getProductByID(w http.ResponseWriter, id int) {
+	for _, p := range products {
+		if p.ID == id {
+			json.NewEncoder(w).Encode(p)
+			return
+		}
+	}
+	http.Error(w, "Product not found", http.StatusNotFound)
 }
 func createProductHandler(w http.ResponseWriter, r *http.Request) {
 	var newProduct models.Product
 	err := json.NewDecoder(r.Body).Decode(&newProduct)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusAccepted)
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 	products = append(products, newProduct)
@@ -51,13 +60,15 @@ func createProductHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(newProduct)
 }
 func productDetailHandler(w http.ResponseWriter, r *http.Request) {
-	idStr := r.URL.Path[len("/products/"):]
+	idStr := r.PathValue("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		http.Error(w, "Invalid product ID", http.StatusBadRequest)
 		return
 	}
 	switch r.Method {
+	case http.MethodGet:
+		getProductByID(w, id)
 	case http.MethodPut:
 		updateProduct(w, r, id)
 	case http.MethodDelete:
@@ -71,7 +82,7 @@ func updateProduct(w http.ResponseWriter, r *http.Request, id int) {
 	var updated models.Product
 	err := json.NewDecoder(r.Body).Decode(&updated)
 	if err != nil {
-		http.Error(w, "Invalid request body", http.StatusAccepted)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
 	for i, p := range products {
