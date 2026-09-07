@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/iankarungaru/catalog-service/models"
 )
@@ -17,6 +18,14 @@ var products = []models.Product{
 
 func healthhandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, `{"status": "ok"}`)
+}
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		next.ServeHTTP(w, r)
+        duration := time.Since(start)
+		fmt.Printf("%s %s - %v\n", r.Method, r.URL.Path, duration)
+	})
 }
 func productsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodGet {
@@ -32,11 +41,12 @@ func productsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/health", healthhandler)
-	http.HandleFunc("/products", productsHandler)
-	http.HandleFunc("/products/{id}", productDetailHandler)
+	mux := http.NewServeMux()
+	mux.HandleFunc("/health", healthhandler)
+	mux.HandleFunc("/products", productsHandler)
+	mux.HandleFunc("/products/{id}", productDetailHandler)
 	fmt.Println("Starting server on :8080")
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8080", loggingMiddleware(mux))
 }
 func getProductByID(w http.ResponseWriter, id int) {
 	for _, p := range products {
