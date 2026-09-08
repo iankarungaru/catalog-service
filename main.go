@@ -17,6 +17,10 @@ var products = []models.Product{
 }
 
 func healthhandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	fmt.Fprintln(w, `{"status": "ok"}`)
 }
 func loggingMiddleware(next http.Handler) http.Handler {
