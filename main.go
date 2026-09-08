@@ -119,3 +119,6 @@ func deleteProduct(w http.ResponseWriter, r *http.Request, id int) {
 	}
 	http.Error(w, "Product not found", http.StatusNotFound)
 }
+func ApplyDiscount(price float64, discount float64) float64 {
+	return price - (price * discount / 100)
+}
