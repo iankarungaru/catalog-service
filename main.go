@@ -17,7 +17,7 @@ func main() {
 	mux.HandleFunc("/health", handlers.HealthHandler)
 	mux.HandleFunc("/products", handlers.ProductsHandler)
 	mux.HandleFunc("/products/{id}", handlers.ProductDetailHandler)
-	fmt.Println("Starting server on :8080")
+	fmt.Println("Catalog service is running on port 8080...")
 	http.ListenAndServe(":8080", handlers.LoggingMiddleware(mux))
 }
 
