@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/iankarungaru/catalog-service/models"
+	"github.com/iankarungaru/patient-service/models"
 )
 var products = []models.Product{
 	{ID: 1, Name: "Laptop", Price: 999.99, Stock: 10},

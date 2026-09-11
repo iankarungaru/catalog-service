@@ -1,3 +1,3 @@
-module github.com/iankarungaru/catalog-service
+module github.com/iankarungaru/patient-service
 
 go 1.26.5
